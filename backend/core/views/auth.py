@@ -4,9 +4,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from core.serializers.auth import CustomTokenObtainPairSerializer
 
 
 class AuthView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
     @swagger_auto_schema(
         operation_summary="Kullanıcı Girişi (JWT Token Al)",
         operation_description="""
@@ -21,24 +24,28 @@ Başarılı bir giriş sonrası iki token döner:
         tags=["Authentication"],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['username', 'password'],
+            required=["username", "password"],
             properties={
-                'username': openapi.Schema(type=openapi.TYPE_STRING, description="Kullanıcı adı"),
-                'password': openapi.Schema(type=openapi.TYPE_STRING, format='password', description="Şifre"),
+                "username": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="Kullanıcı adı"
+                ),
+                "password": openapi.Schema(
+                    type=openapi.TYPE_STRING, format="password", description="Şifre"
+                ),
             },
         ),
         responses={
             200: openapi.Response(
-                description='JWT tokenları',
+                description="JWT tokenları",
                 examples={
-                    'application/json': {
-                        'access': 'ACCESS_TOKEN',
-                        'refresh': 'REFRESH_TOKEN'
+                    "application/json": {
+                        "access": "ACCESS_TOKEN",
+                        "refresh": "REFRESH_TOKEN",
                     }
-                }
+                },
             ),
-            401: openapi.Response(description='Geçersiz kullanıcı adı veya şifre.')
-        }
+            401: openapi.Response(description="Geçersiz kullanıcı adı veya şifre."),
+        },
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -57,22 +64,23 @@ Bu endpoint, mevcut bir **refresh token** ile yeni bir **access token** üretir.
         tags=["Authentication"],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['refresh'],
+            required=["refresh"],
             properties={
-                'refresh': openapi.Schema(type=openapi.TYPE_STRING, description="Daha önce alınmış refresh token"),
+                "refresh": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Daha önce alınmış refresh token",
+                ),
             },
         ),
         responses={
             200: openapi.Response(
                 description="Yeni access token üretildi.",
-                examples={
-                    'application/json': {
-                        'access': 'YENI_ACCESS_TOKEN'
-                    }
-                }
+                examples={"application/json": {"access": "YENI_ACCESS_TOKEN"}},
             ),
-            401: openapi.Response(description='Refresh token geçersiz veya süresi dolmuş.')
-        }
+            401: openapi.Response(
+                description="Refresh token geçersiz veya süresi dolmuş."
+            ),
+        },
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -82,6 +90,7 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
+        security=[{"Bearer": []}],
         operation_summary="Giriş Yapan Kullanıcının Bilgisi",
         operation_description="""
 Bu endpoint, access token ile kimliği doğrulanmış kullanıcının:
@@ -101,19 +110,21 @@ döner.
                         "username": "admin",
                         "full_name": "Ahmet Yılmaz",
                         "team": "Kanat Takımı",
-                        "team_responsibility": "kanat"
+                        "team_responsibility": "kanat",
                     }
-                }
+                },
             ),
-            401: openapi.Response(description="JWT token eksik veya geçersiz.")
-        }
+            401: openapi.Response(description="JWT token eksik veya geçersiz."),
+        },
     )
     def get(self, request):
         user = request.user
         personnel = user.personnel
-        return Response({
-            "username": user.username,
-            "full_name": personnel.full_name,
-            "team": personnel.team.name,
-            "team_responsibility": personnel.team.responsibility,
-        })
+        return Response(
+            {
+                "username": user.username,
+                "full_name": personnel.full_name,
+                "team": personnel.team.name,
+                "team_responsibility": personnel.team.responsibility,
+            }
+        )

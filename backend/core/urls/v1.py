@@ -1,8 +1,23 @@
 from django.urls import path
+from core.views.aircraft import AircraftViewSet
 from core.views.auth import AuthView, RefreshTokenView, MeView
+from core.views.part import PartViewSet
 
 urlpatterns = [
-    path('auth/', AuthView.as_view(), name='token_obtain_pair'),
-    path('auth/refresh/', RefreshTokenView.as_view(), name='token_refresh'),
-    path('me/', MeView.as_view(), name='me'),
+    path("auth/", AuthView.as_view(), name="token_obtain_pair"),
+    path("auth/refresh/", RefreshTokenView.as_view(), name="token_refresh"),
+    path("me/", MeView.as_view(), name="me"),
+    path(
+        "parts/", PartViewSet.as_view({"get": "list", "post": "create"}), name="parts"
+    ),
+    path(
+        "parts/<int:pk>/",
+        PartViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
+        name="parts-detail",
+    ),
+    path(
+        "aircraft/",
+        AircraftViewSet.as_view({"post": "create"}),
+        name="aircraft-create",
+    ),
 ]
