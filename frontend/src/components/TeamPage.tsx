@@ -1,5 +1,5 @@
-import { PaginatedTable } from "./PaginatedTable";
+import { PartPaginatedTable } from "./PartPaginatedTable";
 
 export default function TeamPage() {
-  return <PaginatedTable />;
+  return <PartPaginatedTable />;
 }

@@ -19,23 +19,24 @@ urlpatterns = [
     ),
     path(
         "aircraft/",
-        AircraftViewSet.as_view({"post": "create"}),
-        name="aircraft-create",
+        AircraftViewSet.as_view({"get": "list", "post": "create"}),
+        name="aircraft",
     ),
     path(
-        "part-types/", 
-        PartTypeViewSet.as_view({"get": "list"}), 
-        name="part-types"
+        "aircraft/<int:pk>/",
+        AircraftViewSet.as_view({"get": "retrieve"}),
+        name="aircraft-detail",
     ),
+    path("part-types/", PartTypeViewSet.as_view({"get": "list"}), name="part-types"),
     path(
         "part-types/<int:pk>/",
         PartTypeViewSet.as_view({"get": "retrieve"}),
         name="part-types-detail",
     ),
     path(
-        "aircraft-models/", 
-        AircraftModelViewSet.as_view({"get": "list"}), 
-        name="aircraft-models"
+        "aircraft-models/",
+        AircraftModelViewSet.as_view({"get": "list"}),
+        name="aircraft-models",
     ),
     path(
         "aircraft-models/<int:pk>/",

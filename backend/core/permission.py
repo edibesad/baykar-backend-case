@@ -33,23 +33,16 @@ class IsTeamAuthorizedForPartType(BasePermission):
 
 
 class IsTeamAuthorizedForAircraft(BasePermission):
-    message = "Takımınız bu uçak modelini üretmeye yetkili değil."
+    message = "Bu işlem için Montaj takımına ait olmanız gerekmektedir."
 
     def has_permission(self, request, view):
-
         user = request.user
         personnel = getattr(user, "personnel", None)
 
         if not personnel or not personnel.team:
-            raise PermissionDenied()
+            raise PermissionDenied(self.message)
 
-        aircraft_model_id = request.data.get("model")
-        if not aircraft_model_id:
-            raise PermissionDenied("Uçak modeli belirtilmedi.")
+        if personnel.team.responsibility.lower() != "montaj":
+            raise PermissionDenied(self.message)
 
-        try:
-            aircraft_model = AircraftModel.objects.get(id=aircraft_model_id)
-        except AircraftModel.DoesNotExist:
-            raise PermissionDenied("Geçersiz uçak modeli.")
-
-        return personnel.team.responsibility == "montaj"
+        return True

@@ -41,7 +41,7 @@ export const AddPartModal = ({
   const [types, setTypes] = useState<PartType[]>([]);
   const [aircraftModels, setAircraftModels] = useState<AircraftModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { tokens } = useUserStore();
+  const { tokens, user } = useUserStore();
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -60,6 +60,10 @@ export const AddPartModal = ({
 
         setTypes(typesData);
         setAircraftModels(modelsData);
+
+        newPart.type = typesData.find(
+          (type: PartType) => type.name === user?.team_responsibility
+        )?.id;
       } catch (error) {
         console.error("Error fetching options:", error);
         toast.error("Seçenekler yüklenirken bir hata oluştu", {
@@ -74,7 +78,7 @@ export const AddPartModal = ({
     if (show) {
       fetchOptions();
     }
-  }, [show, tokens?.access]);
+  }, [newPart, show, tokens?.access, user?.team_responsibility]);
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -221,6 +225,7 @@ export const AddPartModal = ({
               name="type"
               value={newPart.type}
               onChange={handleInputChange}
+              disabled={true}
               required
             >
               <option value="">Seçiniz</option>

@@ -1,11 +1,12 @@
 "use client";
 
-import { Table, Pagination, Card, Button } from "react-bootstrap";
-import { useEffect, useState } from "react";
+import { Table, Pagination, Card, Button, Modal } from "react-bootstrap";
+import { useCallback, useEffect, useState } from "react";
 import { Part } from "@/models/part";
 import { API_URL } from "@/config/env";
 import { useUserStore } from "@/store/user-store";
 import { AddPartModal } from "./AddPartModal";
+import { toast } from "react-toastify";
 
 const columns = [
   "#",
@@ -14,16 +15,19 @@ const columns = [
   "Uçak Modeli",
   "Üreten",
   "Kullanıldığı Uçak",
+  "İşlemler",
 ];
 
-export const PaginatedTable = () => {
+export const PartPaginatedTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState<Part[]>([]);
   const { tokens } = useUserStore();
   const itemsPerPage = 10;
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [partToDelete, setPartToDelete] = useState<number | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const response = await fetch(`${API_URL}/parts`, {
       headers: {
         Authorization: `Bearer ${tokens?.access}`,
@@ -31,11 +35,11 @@ export const PaginatedTable = () => {
     });
     const data = await response.json();
     setData(data);
-  };
+  }, [tokens?.access]);
 
   useEffect(() => {
     fetchData();
-  }, [tokens?.access]);
+  }, [fetchData, tokens?.access]);
 
   // Calculate total pages
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -54,6 +58,54 @@ export const PaginatedTable = () => {
   const handleCloseModal = () => setShowModal(false);
   const handlePartAdded = () => {
     fetchData();
+  };
+
+  const handleDelete = async (partId: number) => {
+    try {
+      const response = await fetch(`${API_URL}/parts/${partId}/`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${tokens?.access}`,
+        },
+      });
+
+      if (response.ok) {
+        toast.success("Parça başarıyla silindi", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
+        fetchData();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.detail || "Parça silinirken bir hata oluştu", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
+      }
+    } catch (error) {
+      toast.error(
+        `Parça silinirken bir hata oluştu: ${
+          error instanceof Error ? error.message : "Bilinmeyen hata"
+        }`,
+        {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        }
+      );
+    }
+    setShowDeleteConfirm(false);
+    setPartToDelete(null);
+  };
+
+  const confirmDelete = (partId: number) => {
+    setPartToDelete(partId);
+    setShowDeleteConfirm(true);
   };
 
   // Generate pagination items
@@ -121,6 +173,15 @@ export const PaginatedTable = () => {
                   <td>{item.aircraft_model?.name}</td>
                   <td>{item.produced_by?.full_name}</td>
                   <td>{item.used_in_aircraft?.model?.name}</td>
+                  <td>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => confirmDelete(item.id!)}
+                    >
+                      Sil
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -139,6 +200,30 @@ export const PaginatedTable = () => {
         onHide={handleCloseModal}
         onPartAdded={handlePartAdded}
       />
+
+      <Modal
+        show={showDeleteConfirm}
+        onHide={() => setShowDeleteConfirm(false)}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Parça Silme Onayı</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Bu parçayı silmek istediğinizden emin misiniz?</Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowDeleteConfirm(false)}
+          >
+            İptal
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => partToDelete && handleDelete(partToDelete)}
+          >
+            Sil
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

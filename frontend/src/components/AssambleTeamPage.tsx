@@ -1,3 +1,5 @@
+import { AircraftPaginatedTable } from "./AircraftPaginatedTable";
+
 export default function AssambleTeamPage() {
-  return <div>Assamble Team Page</div>;
+  return <AircraftPaginatedTable />;
 }
