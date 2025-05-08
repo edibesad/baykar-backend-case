@@ -17,7 +17,7 @@ class IsTeamAuthorizedForPartType(BasePermission):
         if not personnel or not personnel.team:
             return False
 
-        part_type_id = request.data.get("type")
+        part_type_id = request.data.get("type_id")
         if not part_type_id:
             raise PermissionDenied("Parça türü belirtilmedi.")
 

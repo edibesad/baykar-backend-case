@@ -7,6 +7,7 @@ class Team(models.Model):
         ("aviyonik", "Aviyonik"),
         ("motor", "Motor"),
         ("montaj", "Montaj"),
+        ("kuyruk", "Kuyruk"),
     ]
 
     name = models.CharField(max_length=50, unique=True)

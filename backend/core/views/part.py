@@ -66,15 +66,15 @@ Eğer takımınız type ile eşleşmiyorsa **403 hatası** döner.
         """,
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=["serial_number", "type", "aircraft_model"],
+            required=["serial_number", "type_id", "aircraft_model_id"],
             properties={
                 "serial_number": openapi.Schema(
                     type=openapi.TYPE_STRING, description="Parça seri numarası"
                 ),
-                "type": openapi.Schema(
+                "type_id": openapi.Schema(
                     type=openapi.TYPE_INTEGER, description="Parça türü ID"
                 ),
-                "aircraft_model": openapi.Schema(
+                "aircraft_model_id": openapi.Schema(
                     type=openapi.TYPE_INTEGER, description="Uçak modeli ID"
                 ),
             },

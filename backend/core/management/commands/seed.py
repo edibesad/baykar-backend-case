@@ -18,6 +18,7 @@ class Command(BaseCommand):
             ("Aviyonik Takımı", "aviyonik"),
             ("Motor Takımı", "motor"),
             ("Montaj Takımı", "montaj"),
+            ("Kuyruk Takımı", "kuyruk"),
         ]
         teams = {}
         for name, resp in team_data:

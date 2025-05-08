@@ -28,8 +28,11 @@ class AircraftViewSet(viewsets.ModelViewSet):
 
         if not personnel or not personnel.team:
             return Aircraft.objects.none()
+        
+        if personnel.team.name.lower() != "montaj":
+            raise permissions.PermissionDenied("Bu işlem için Montaj takımına ait olmanız gerekmektedir.")
 
-        return Aircraft.objects.filter(assembled_by=personnel)
+        return Aircraft.objects
 
     @swagger_auto_schema(
         operation_summary="Yeni Uçak Montajı",
