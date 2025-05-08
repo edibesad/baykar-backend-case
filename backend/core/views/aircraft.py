@@ -6,9 +6,7 @@ from rest_framework.response import Response
 from core.serializers.aircraft import AircraftSerializer, AircraftDetailSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-import logging
 
-logger = logging.getLogger(__name__)
 
 expected_types = {
     "wing": "kanat",
