@@ -4,15 +4,14 @@ import TeamPage from "./TeamPage";
 export default function PageByTeam({
   team,
 }: {
-  team: "kuyruk" | "kanat" | "gövde" | "aviyonik" | "montaj" | "motor" | null;
+  team: "kuyruk" | "kanat" | "gövde" | "aviyonik" | "montaj" | null;
 }) {
   console.log("team", team);
   if (
     team === "kuyruk" ||
     team === "kanat" ||
     team === "gövde" ||
-    team === "aviyonik" ||
-    team === "motor"
+    team === "aviyonik"
   ) {
     return <TeamPage />;
   } else if (team === "montaj") {

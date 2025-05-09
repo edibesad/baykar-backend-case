@@ -5,7 +5,6 @@ class Team(models.Model):
         ("gövde", "Gövde"),
         ("kanat", "Kanat"),
         ("aviyonik", "Aviyonik"),
-        ("motor", "Motor"),
         ("montaj", "Montaj"),
         ("kuyruk", "Kuyruk"),
     ]

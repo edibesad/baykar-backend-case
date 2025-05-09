@@ -25,12 +25,8 @@ export const AddAircraftModal = ({
   const [formData, setFormData] = useState({
     serial_number: "",
     model: "",
-    wing_serial: "",
-    body_serial: "",
-    tail_serial: "",
-    avionic_serial: "",
-    engine_serial: "",
   });
+  const [parts, setParts] = useState<string[]>([""]);
   const [models, setModels] = useState<AircraftModel[]>([]);
   const { tokens } = useUserStore();
 
@@ -42,8 +38,10 @@ export const AddAircraftModal = ({
             Authorization: `Bearer ${tokens?.access}`,
           },
         });
-        const data = await response.json();
-        setModels(data);
+        const responseData = await response.json();
+        // Handle both the new paginated response format and backward compatibility
+        const models = responseData.data || responseData;
+        setModels(Array.isArray(models) ? models : []);
       } catch (error) {
         console.error("Error fetching aircraft models:", error);
         toast.error("Uçak modelleri yüklenirken bir hata oluştu", {
@@ -63,6 +61,8 @@ export const AddAircraftModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const filteredParts = parts.filter((part) => part.trim() !== "");
+
       const response = await fetch(`${API_URL}/aircraft/`, {
         method: "POST",
         headers: {
@@ -70,8 +70,9 @@ export const AddAircraftModal = ({
           Authorization: `Bearer ${tokens?.access}`,
         },
         body: JSON.stringify({
-          ...formData,
+          serial_number: formData.serial_number,
           model: parseInt(formData.model),
+          parts: filteredParts,
         }),
       });
 
@@ -87,16 +88,13 @@ export const AddAircraftModal = ({
         setFormData({
           serial_number: "",
           model: "",
-          wing_serial: "",
-          body_serial: "",
-          tail_serial: "",
-          avionic_serial: "",
-          engine_serial: "",
         });
+        setParts([""]);
       } else {
         console.log(response);
         const errorData = await response.json();
-        toast.error(errorData.detail || "Uçak eklenirken bir hata oluştu", {
+        console.log("errorData", errorData.details);
+        toast.error(errorData.details || "Uçak eklenirken bir hata oluştu", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -124,6 +122,24 @@ export const AddAircraftModal = ({
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handlePartChange = (index: number, value: string) => {
+    const newParts = [...parts];
+    newParts[index] = value;
+    setParts(newParts);
+  };
+
+  const addPart = () => {
+    setParts([...parts, ""]);
+  };
+
+  const removePart = (index: number) => {
+    if (parts.length > 1) {
+      const newParts = [...parts];
+      newParts.splice(index, 1);
+      setParts(newParts);
+    }
   };
 
   return (
@@ -159,62 +175,43 @@ export const AddAircraftModal = ({
               ))}
             </Form.Select>
           </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Kanat Seri Numarası</Form.Label>
-            <Form.Control
-              type="text"
-              name="wing_serial"
-              value={formData.wing_serial}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Gövde Seri Numarası</Form.Label>
-            <Form.Control
-              type="text"
-              name="body_serial"
-              value={formData.body_serial}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Kuyruk Seri Numarası</Form.Label>
-            <Form.Control
-              type="text"
-              name="tail_serial"
-              value={formData.tail_serial}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Avionik Seri Numarası</Form.Label>
-            <Form.Control
-              type="text"
-              name="avionic_serial"
-              value={formData.avionic_serial}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Motor Seri Numarası</Form.Label>
-            <Form.Control
-              type="text"
-              name="engine_serial"
-              value={formData.engine_serial}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
+
+          <div className="mb-3">
+            <Form.Label>Parça Seri Numaraları</Form.Label>
+            {parts.map((part, index) => (
+              <div key={index} className="d-flex mb-2 gap-2">
+                <Form.Control
+                  type="text"
+                  value={part}
+                  onChange={(e) => handlePartChange(index, e.target.value)}
+                  placeholder="Parça seri numarası girin"
+                  required={index === 0}
+                />
+                <Button
+                  variant="outline-danger"
+                  onClick={() => removePart(index)}
+                  disabled={parts.length === 1 && index === 0}
+                >
+                  Sil
+                </Button>
+              </div>
+            ))}
+            <Button
+              variant="outline-primary"
+              onClick={addPart}
+              className="mt-2"
+              size="sm"
+            >
+              Yeni Parça Ekle
+            </Button>
+          </div>
+
           <div className="d-flex justify-content-end gap-2">
             <Button variant="secondary" onClick={onHide}>
               İptal
             </Button>
             <Button variant="primary" type="submit">
-              Ekle
+              Üret
             </Button>
           </div>
         </Form>

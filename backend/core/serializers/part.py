@@ -22,6 +22,7 @@ class PersonnelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Personnel
         fields = ['id', 'full_name', 'team']
+        ref_name = "PartPersonnelSerializer"
 
 
 class AircraftMinimalSerializer(serializers.ModelSerializer):

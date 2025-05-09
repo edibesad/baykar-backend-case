@@ -17,6 +17,22 @@ class PartTypeViewSet(viewsets.ReadOnlyModelViewSet):
         operation_summary="Parça Tiplerini Listele",
         operation_description="Sistemdeki tüm parça tiplerini listeler",
         responses={200: PartTypeSerializer(many=True)},
+        manual_parameters=[
+            openapi.Parameter(
+                'limit',
+                openapi.IN_QUERY,
+                description="Sayfalama için limit değeri",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            ),
+            openapi.Parameter(
+                'offset',
+                openapi.IN_QUERY,
+                description="Sayfalama için offset değeri",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            )
+        ],
         tags=["Part Types"],
     )
     def list(self, request, *args, **kwargs):

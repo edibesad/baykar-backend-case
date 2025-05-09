@@ -55,15 +55,29 @@ export const AddPartModal = ({
           }),
         ]);
 
-        const typesData = await typesRes.json();
-        const modelsData = await modelsRes.json();
+        const typesResponseData = await typesRes.json();
+        const modelsResponseData = await modelsRes.json();
 
-        setTypes(typesData);
-        setAircraftModels(modelsData);
+        // Handle both the new paginated response format and backward compatibility
+        const typesData = typesResponseData.data || typesResponseData;
+        const modelsData = modelsResponseData.data || modelsResponseData;
 
-        newPart.type = typesData.find(
-          (type: PartType) => type.name === user?.team_responsibility
-        )?.id;
+        setTypes(Array.isArray(typesData) ? typesData : []);
+        setAircraftModels(Array.isArray(modelsData) ? modelsData : []);
+
+        // Find the part type matching the user's team responsibility
+        const userPartType = Array.isArray(typesData)
+          ? typesData.find(
+              (type: PartType) => type.name === user?.team_responsibility
+            )?.id
+          : undefined;
+
+        if (userPartType) {
+          setNewPart((prev) => ({
+            ...prev,
+            type: String(userPartType),
+          }));
+        }
       } catch (error) {
         console.error("Error fetching options:", error);
         toast.error("Seçenekler yüklenirken bir hata oluştu", {
@@ -78,7 +92,7 @@ export const AddPartModal = ({
     if (show) {
       fetchOptions();
     }
-  }, [newPart, show, tokens?.access, user?.team_responsibility]);
+  }, [show, tokens?.access, user?.team_responsibility]);
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -259,7 +273,7 @@ export const AddPartModal = ({
               İptal
             </Button>
             <Button variant="primary" type="submit" disabled={isLoading}>
-              {isLoading ? "Ekleniyor..." : "Ekle"}
+              {isLoading ? "Üretiliyor..." : "Üret"}
             </Button>
           </div>
         </Form>

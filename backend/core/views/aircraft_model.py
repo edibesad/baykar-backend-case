@@ -17,6 +17,22 @@ class AircraftModelViewSet(viewsets.ReadOnlyModelViewSet):
         operation_summary="Uçak Modellerini Listele",
         operation_description="Sistemdeki tüm uçak modellerini listeler",
         responses={200: AircraftModelSerializer(many=True)},
+        manual_parameters=[
+            openapi.Parameter(
+                'limit',
+                openapi.IN_QUERY,
+                description="Sayfalama için limit değeri",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            ),
+            openapi.Parameter(
+                'offset',
+                openapi.IN_QUERY,
+                description="Sayfalama için offset değeri",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            )
+        ],
         tags=["Aircraft Models"],
     )
     def list(self, request, *args, **kwargs):

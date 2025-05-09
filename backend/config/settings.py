@@ -145,6 +145,9 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "EXCEPTION_HANDLER": "core.utils.custom_exception_handler",
+    "DEFAULT_PAGINATION_CLASS": "core.utils.CustomPagination",
+    "PAGE_SIZE": 10,
 }
 
 # JWT Settings

@@ -6,7 +6,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Uçak modelleri
-        for name in ["TB2", "TB3", "Akıncı"]:
+        for name in ["TB2", "TB3", "Akıncı", "Kızılelma"]:
             model, created = AircraftModel.objects.get_or_create(name=name)
             if created:
                 self.stdout.write(self.style.SUCCESS(f"AircraftModel eklendi: {name}"))
@@ -16,7 +16,6 @@ class Command(BaseCommand):
             ("Gövde Takımı", "gövde"),
             ("Kanat Takımı", "kanat"),
             ("Aviyonik Takımı", "aviyonik"),
-            ("Motor Takımı", "motor"),
             ("Montaj Takımı", "montaj"),
             ("Kuyruk Takımı", "kuyruk"),
         ]
@@ -27,7 +26,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f"Team eklendi: {name}"))
 
         # Parça tipleri
-        for part in ["gövde", "kanat", "aviyonik", "motor"]:
+        for part in ["gövde", "kanat", "aviyonik", "kuyruk"]:
             if part in teams:
                 pt, created = PartType.objects.get_or_create(name=part, allowed_team=teams[part])
                 if created:

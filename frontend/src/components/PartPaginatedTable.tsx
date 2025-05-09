@@ -1,12 +1,14 @@
 "use client";
 
-import { Table, Pagination, Card, Button, Modal } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import { useCallback, useEffect, useState } from "react";
 import { Part } from "@/models/part";
 import { API_URL } from "@/config/env";
 import { useUserStore } from "@/store/user-store";
 import { AddPartModal } from "./AddPartModal";
 import { toast } from "react-toastify";
+import PaginatedTable from "./PaginatedTable";
+import { PaginatedResponse } from "@/models/pagination.model";
 
 const columns = [
   "#",
@@ -18,46 +20,72 @@ const columns = [
   "İşlemler",
 ];
 
-export const PartPaginatedTable = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+type PartPaginatedTableProps = {
+  aircraft_id?: number;
+};
+
+export const PartPaginatedTable = ({
+  aircraft_id,
+}: PartPaginatedTableProps) => {
   const [data, setData] = useState<Part[]>([]);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(10);
   const { tokens } = useUserStore();
-  const itemsPerPage = 10;
   const [showModal, setShowModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [partToDelete, setPartToDelete] = useState<number | null>(null);
 
-  const fetchData = useCallback(async () => {
-    const response = await fetch(`${API_URL}/parts`, {
-      headers: {
-        Authorization: `Bearer ${tokens?.access}`,
-      },
-    });
-    const data = await response.json();
-    setData(data);
-  }, [tokens?.access]);
+  const fetchData = useCallback(
+    async (page: number = 1) => {
+      try {
+        const offset = (page - 1) * itemsPerPage;
+        let url = `${API_URL}/parts?limit=${itemsPerPage}&offset=${offset}`;
+
+        if (aircraft_id) {
+          url += `&aircraft_id=${aircraft_id}`;
+        }
+
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${tokens?.access}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch parts data");
+        }
+
+        const responseData: PaginatedResponse<Part> = await response.json();
+        setData(responseData.data);
+        setTotalItems(responseData.total);
+      } catch (error) {
+        console.error("Error fetching parts data:", error);
+        setData([]);
+        toast.error("Parça verileri yüklenirken bir hata oluştu", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
+      }
+    },
+    [tokens?.access, aircraft_id, itemsPerPage]
+  );
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData, tokens?.access]);
+    fetchData(currentPage);
+  }, [fetchData, currentPage]);
 
-  // Calculate total pages
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-
-  // Get current items
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
-
-  // Change page
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
   const handlePartAdded = () => {
-    fetchData();
+    fetchData(1); // Reset to first page after adding a part
+    setCurrentPage(1);
   };
 
   const handleDelete = async (partId: number) => {
@@ -76,7 +104,7 @@ export const PartPaginatedTable = () => {
           hideProgressBar: false,
           closeOnClick: true,
         });
-        fetchData();
+        fetchData(currentPage);
       } else {
         const errorData = await response.json();
         toast.error(errorData.detail || "Parça silinirken bir hata oluştu", {
@@ -108,92 +136,37 @@ export const PartPaginatedTable = () => {
     setShowDeleteConfirm(true);
   };
 
-  // Generate pagination items
-  const renderPaginationItems = () => {
-    const items = [];
-
-    // Previous button
-    items.push(
-      <Pagination.Prev
-        key="prev"
-        onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-        disabled={currentPage === 1}
-      />
-    );
-
-    // Page numbers
-    for (let number = 1; number <= totalPages; number++) {
-      items.push(
-        <Pagination.Item
-          key={number}
-          active={number === currentPage}
-          onClick={() => handlePageChange(number)}
-        >
-          {number}
-        </Pagination.Item>
-      );
-    }
-
-    // Next button
-    items.push(
-      <Pagination.Next
-        key="next"
-        onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-        disabled={currentPage === totalPages || totalPages === 0}
-      />
-    );
-
-    return items;
-  };
-
   return (
     <>
-      <Card className="min-h-3/4">
-        <Card.Header className="d-flex justify-content-between align-items-center">
-          <h4 className="mb-0">Parça Listesi</h4>
-          <Button variant="primary" onClick={handleShowModal}>
-            Ekle
-          </Button>
-        </Card.Header>
-        <Card.Body>
-          <Table>
-            <thead>
-              <tr>
-                {columns.map((column, index) => (
-                  <th key={index}>{column}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {currentItems.map((item, rowIndex) => (
-                <tr key={rowIndex}>
-                  <td>{item.id}</td>
-                  <td>{item.serial_number}</td>
-                  <td>{item.type?.name}</td>
-                  <td>{item.aircraft_model?.name}</td>
-                  <td>{item.produced_by?.full_name}</td>
-                  <td>{item.used_in_aircraft?.model?.name}</td>
-                  <td>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => confirmDelete(item.id!)}
-                    >
-                      Sil
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-
-          {totalPages > 1 && (
-            <div className="d-flex justify-content-center mt-3">
-              <Pagination>{renderPaginationItems()}</Pagination>
-            </div>
-          )}
-        </Card.Body>
-      </Card>
+      <PaginatedTable
+        data={data}
+        columns={columns}
+        title="Parça Listesi"
+        onAdd={handleShowModal}
+        itemsPerPage={itemsPerPage}
+        totalItems={totalItems}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+        renderRow={(item, rowIndex) => (
+          <tr key={rowIndex}>
+            <td>{item.id}</td>
+            <td>{item.serial_number}</td>
+            <td>{item.type?.name}</td>
+            <td>{item.aircraft_model?.name}</td>
+            <td>{item.produced_by?.full_name}</td>
+            <td>{item.used_in_aircraft?.serial_number}</td>
+            <td>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => confirmDelete(item.id!)}
+              >
+                Sil
+              </Button>
+            </td>
+          </tr>
+        )}
+      />
 
       <AddPartModal
         show={showModal}

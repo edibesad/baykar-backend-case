@@ -18,6 +18,11 @@ urlpatterns = [
         name="parts-detail",
     ),
     path(
+        "parts/stock/",
+        PartViewSet.as_view({"get": "stock"}),
+        name="parts-stock",
+    ),
+    path(
         "aircraft/",
         AircraftViewSet.as_view({"get": "list", "post": "create"}),
         name="aircraft",
