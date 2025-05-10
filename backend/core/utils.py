@@ -26,7 +26,9 @@ def custom_exception_handler(exc, context):
                 # Tüm alanlardaki ilk hatayı al
                 for key, value in response.data.items():
                     if isinstance(value, list) and value:
-                        response.data[key] = value[0]
+                        response.data = {"details": value[0]}
+                    elif isinstance(value, str):
+                        response.data = {"details": value}
 
     return response
 

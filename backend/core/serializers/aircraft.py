@@ -19,10 +19,17 @@ class AircraftSerializer(serializers.ModelSerializer):
         source="model",
         queryset=Aircraft._meta.get_field("model").related_model.objects.all(),
         write_only=True,
+        required=True,
         error_messages={
             "does_not_exist": "Belirtilen uçak modeli bulunamadı.",
             "invalid": "Geçersiz uçak modeli ID'si.",
+            "required": "Uçak modeli belirtilmedi.",
         },
+    )
+    serial_number = serializers.CharField(
+        error_messages={
+            "unique": "Bu seri numarasına sahip bir uçak zaten mevcut.",
+        }
     )
     assembled_by = PersonnelSerializer(read_only=True)
 
@@ -40,6 +47,9 @@ class AircraftSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "assembled_by", "assembled_at"]
 
     def validate(self, data):
+        if "model" not in data:
+            raise serializers.ValidationError({"details": "Uçak modeli belirtilmedi."})
+
         # Verilerden parçalar listesini çıkar ancak doğrulanmış son verilerde tutma
         part_serial_numbers = data.pop("parts", [])
 
