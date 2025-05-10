@@ -5,6 +5,7 @@ export interface PartStock {
   stock_count: number;
 }
 
+// Uçak modeline göre parça stok bilgisi
 export interface AircraftPartStock {
   aircraft_model_name: string;
   parts: PartStock[];

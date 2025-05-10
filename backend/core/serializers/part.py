@@ -7,13 +7,13 @@ class PartTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PartType
-        fields = ['id', 'name', 'allowed_team']
+        fields = ["id", "name", "allowed_team"]
 
 
 class AircraftModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = AircraftModel
-        fields = ['id', 'name']
+        fields = ["id", "name"]
 
 
 class PersonnelSerializer(serializers.ModelSerializer):
@@ -21,7 +21,7 @@ class PersonnelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Personnel
-        fields = ['id', 'full_name', 'team']
+        fields = ["id", "full_name", "team"]
         ref_name = "PartPersonnelSerializer"
 
 
@@ -30,7 +30,13 @@ class AircraftMinimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Aircraft
-        fields = ['id', 'serial_number', 'model']
+        fields = ["id", "serial_number", "model"]
+
+
+class PartMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Part
+        fields = ["id", "serial_number", "type"]
 
 
 class PartSerializer(serializers.ModelSerializer):
@@ -38,13 +44,13 @@ class PartSerializer(serializers.ModelSerializer):
     aircraft_model = AircraftModelSerializer(read_only=True)
     produced_by = PersonnelSerializer(read_only=True)
     used_in_aircraft = AircraftMinimalSerializer(read_only=True)
-    
+
     # Adding these fields for write operations since the nested serializers are read-only
     type_id = serializers.PrimaryKeyRelatedField(
-        source='type', write_only=True, queryset=PartType.objects.all()
+        source="type", write_only=True, queryset=PartType.objects.all()
     )
     aircraft_model_id = serializers.PrimaryKeyRelatedField(
-        source='aircraft_model', write_only=True, queryset=AircraftModel.objects.all()
+        source="aircraft_model", write_only=True, queryset=AircraftModel.objects.all()
     )
 
     class Meta:
@@ -52,8 +58,10 @@ class PartSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "serial_number",
-            "type", "type_id",
-            "aircraft_model", "aircraft_model_id",
+            "type",
+            "type_id",
+            "aircraft_model",
+            "aircraft_model_id",
             "used_in_aircraft",
             "produced_by",
             "created_at",

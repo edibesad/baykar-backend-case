@@ -107,7 +107,7 @@ export const PartPaginatedTable = ({
         fetchData(currentPage);
       } else {
         const errorData = await response.json();
-        toast.error(errorData.detail || "Parça silinirken bir hata oluştu", {
+        toast.error(errorData.details || "Parça silinirken bir hata oluştu", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -161,7 +161,7 @@ export const PartPaginatedTable = ({
                 size="sm"
                 onClick={() => confirmDelete(item.id!)}
               >
-                Sil
+                Geri dönüşüm
               </Button>
             </td>
           </tr>
@@ -181,7 +181,9 @@ export const PartPaginatedTable = ({
         <Modal.Header closeButton>
           <Modal.Title>Parça Silme Onayı</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Bu parçayı silmek istediğinizden emin misiniz?</Modal.Body>
+        <Modal.Body>
+          Bu parçayı geri dönüşüme vermek istediğinizden emin misiniz?
+        </Modal.Body>
         <Modal.Footer>
           <Button
             variant="secondary"

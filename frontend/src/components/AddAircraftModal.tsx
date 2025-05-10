@@ -39,7 +39,6 @@ export const AddAircraftModal = ({
           },
         });
         const responseData = await response.json();
-        // Handle both the new paginated response format and backward compatibility
         const models = responseData.data || responseData;
         setModels(Array.isArray(models) ? models : []);
       } catch (error) {
@@ -62,7 +61,14 @@ export const AddAircraftModal = ({
     e.preventDefault();
     try {
       const filteredParts = parts.filter((part) => part.trim() !== "");
-
+      // Gönderilecek veriyi konsola yazdır
+      console.log(
+        JSON.stringify({
+          serial_number: formData.serial_number,
+          model: parseInt(formData.model),
+          parts: filteredParts,
+        })
+      );
       const response = await fetch(`${API_URL}/aircraft/`, {
         method: "POST",
         headers: {
@@ -71,7 +77,7 @@ export const AddAircraftModal = ({
         },
         body: JSON.stringify({
           serial_number: formData.serial_number,
-          model: parseInt(formData.model),
+          model_id: parseInt(formData.model),
           parts: filteredParts,
         }),
       });

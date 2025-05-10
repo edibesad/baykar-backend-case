@@ -29,7 +29,7 @@ urlpatterns = [
     ),
     path(
         "aircraft/<int:pk>/",
-        AircraftViewSet.as_view({"get": "retrieve"}),
+        AircraftViewSet.as_view({"get": "retrieve", "delete": "destroy"}),
         name="aircraft-detail",
     ),
     path("part-types/", PartTypeViewSet.as_view({"get": "list"}), name="part-types"),

@@ -7,4 +7,4 @@ class AircraftModelSerializer(serializers.ModelSerializer):
         model = AircraftModel
         fields = ["id", "name"]
         read_only_fields = ["id"]
-        ref_name = "AircraftModelDetail" 
+        ref_name = "AircraftModelDetail"

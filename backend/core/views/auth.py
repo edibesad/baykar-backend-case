@@ -8,6 +8,12 @@ from core.serializers.auth import CustomTokenObtainPairSerializer
 
 
 class AuthView(TokenObtainPairView):
+    """
+    Kullanıcı kimlik doğrulama işlemlerini yöneten view.
+    JWT token tabanlı kimlik doğrulama sağlar.
+    """
+
+    # Özel token alım serializer'ı
     serializer_class = CustomTokenObtainPairSerializer
 
     @swagger_auto_schema(
@@ -48,10 +54,18 @@ Başarılı bir giriş sonrası iki token döner:
         },
     )
     def post(self, request, *args, **kwargs):
+        """
+        Kullanıcı girişi yapar ve JWT tokenları döndürür.
+        """
         return super().post(request, *args, **kwargs)
 
 
 class RefreshTokenView(TokenRefreshView):
+    """
+    Access token yenileme işlemlerini yöneten view.
+    Refresh token kullanarak yeni access token üretir.
+    """
+
     @swagger_auto_schema(
         operation_summary="Access Token Yenile (Refresh ile)",
         operation_description="""
@@ -83,10 +97,19 @@ Bu endpoint, mevcut bir **refresh token** ile yeni bir **access token** üretir.
         },
     )
     def post(self, request, *args, **kwargs):
+        """
+        Refresh token kullanarak yeni bir access token üretir.
+        """
         return super().post(request, *args, **kwargs)
 
 
 class MeView(APIView):
+    """
+    Giriş yapmış kullanıcının bilgilerini döndüren view.
+    Sadece kimliği doğrulanmış kullanıcılar erişebilir.
+    """
+
+    # Sadece kimliği doğrulanmış kullanıcıların erişimine izin ver
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -118,6 +141,10 @@ döner.
         },
     )
     def get(self, request):
+        """
+        Giriş yapmış kullanıcının detaylı bilgilerini getirir.
+        Kullanıcı adı, tam adı, takım bilgisi ve sorumluluğunu içerir.
+        """
         user = request.user
         personnel = user.personnel
         return Response(

@@ -186,7 +186,9 @@ export const AircraftPaginatedTable = () => {
         <Modal.Header closeButton>
           <Modal.Title>Uçak Silme Onayı</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Bu uçağı silmek istediğinizden emin misiniz?</Modal.Body>
+        <Modal.Body>
+          Bu uçağı silmek istediğinizden emin misiniz? Stoklar iade edilecek.
+        </Modal.Body>
         <Modal.Footer>
           <Button
             variant="secondary"

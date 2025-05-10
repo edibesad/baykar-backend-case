@@ -18,7 +18,7 @@ export default function PartStockPage() {
   const [showAlerts, setShowAlerts] = useState(false);
   const { tokens } = useUserStore();
 
-  // Fetch data from API
+  // API'den veri çek
   const fetchData = useCallback(
     async (page: number = 1) => {
       try {
@@ -65,7 +65,7 @@ export default function PartStockPage() {
     setCurrentPage(page);
   };
 
-  // Calculate out-of-stock items for alerts
+  // Stok dışı ürünleri uyarılar için hesapla
   const outOfStockItems = Array.isArray(data)
     ? data.flatMap((aircraft) =>
         aircraft.parts
@@ -77,7 +77,7 @@ export default function PartStockPage() {
       )
     : [];
 
-  // Prepare flattened data for the table
+  // Tablo için düzleştirilmiş veriyi hazırla
   const flattenedData = Array.isArray(data)
     ? data.flatMap((aircraft) =>
         aircraft.parts.map((part) => ({
@@ -87,7 +87,7 @@ export default function PartStockPage() {
       )
     : [];
 
-  // Define table columns
+  // Tablo sütunlarını tanımla
   const columns = [
     "Uçak Modeli",
     "Parça Tipi",
@@ -137,7 +137,7 @@ export default function PartStockPage() {
         )}
       />
 
-      {/* Alerts Modal */}
+      {/* Uyarılar Modalı */}
       <Modal show={showAlerts} onHide={() => setShowAlerts(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Stok Uyarıları</Modal.Title>

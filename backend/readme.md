@@ -1,90 +1,90 @@
-# Uçak Üretim Sistemi - Django API
+# Uçak Üretim Sistemi - Django REST API
 
-Bu proje, takımlara göre parça üretimi, montaj, geri dönüşüm ve stok kontrolü gibi işlemleri içeren JWT tabanlı bir Django REST API uygulamasıdır.
+Bu proje, takımlara göre parça üretimi, montaj, geri dönüşüm ve stok kontrolü gibi işlemleri yürüten JWT tabanlı bir Django REST API uygulamasıdır.
 
-## İçerik
+## Proje Kapsamı
 
-* JWT ile kimlik doğrulama
-* Takıma bağlı parça yetkileri
-* Parça stoğu, geri dönüşüm işlemleri
-* Uçak montajı ve parça takibi
-* Swagger dokümantasyonu
+* JWT ile kimlik doğrulama sistemi
+* Takımlara özgü parça yetkilendirme mekanizması
+* Parça stok takibi ve geri dönüşüm süreci
+* Uçak montaj işlemleri ve parça takibi
+* Swagger ile API dokümantasyonu
 
 ---
 
-## İlk Kurulum (Geliştirici Rehberi)
+## Kurulum Rehberi (Geliştirici)
 
-### 1. Reposu klonla
+### 1. Depoyu Klonlayın
 
 ```bash
 git clone <repo-url>
 cd backend
 ```
 
-### 2. Ortam dosyası oluştur
+### 2. Ortam Değişkenlerini Tanımlayın
 
-```
+```bash
 cp .env.example .env
 ```
 
-### 3. Docker ile ayağa kaldır
+### 3. Docker Servislerini Başlatın
 
 ```bash
 docker-compose build
-docker-compose up -d
+docker-compose up
 ```
 
-> Bu işlem PostgreSQL ve Django servisini başlatır.
+> Bu adım PostgreSQL ve Django servislerini başlatır.
 
-### 4. Migration dosyalarını oluştur
+### 4. Gerekli Migration Dosyalarını Oluşturun
 
 ```bash
 docker-compose exec web python manage.py makemigrations
-# veya sadece core app için
+# Yalnızca "core" uygulaması için:
 # docker-compose exec web python manage.py makemigrations core
 ```
 
-### 5. Veritabanı tablolarını oluştur
+### 5. Veritabanı Tablolarını Oluşturun
 
 ```bash
 docker-compose exec web python manage.py migrate
 ```
 
-### 6. İlk verileri ekle (uçak modeli, takım, parça tipi)
+### 6. Varsayılan Veri Setini Ekleyin (Uçak Modeli, Takım, Parça Tipi)
 
 ```bash
 docker-compose exec web python manage.py seed
 ```
 
-### 7. Admin kullanıcısı oluştur
+### 7. Yönetici Kullanıcı Oluşturun
 
 ```bash
 docker-compose exec web python manage.py createsuperuser
 ```
 
-> Bu adım **zorunludur** çünkü sisteme giriş yapılacak kullanıcı yoksa `/auth/` endpoint'inden token alamazsın. Bu kullanıcıya admin panelden `Personnel` ilişkisi kurmalısın.
+> Bu adım **zorunludur**. Sisteme giriş yapabilecek bir kullanıcı olmadan JWT token alınamaz. Admin panelinden bu kullanıcıya ilişkili bir `Personnel` kaydı oluşturmanız gerekir.
 
-### 8. Admin paneli (tarayıcıdan)
+### 8. Yönetim Paneline Erişim
 
 ```
 http://localhost:8000/admin
 ```
 
-Buradan yeni kullanıcı ve Personnel ekleyebilirsin.
+Bu panel aracılığıyla yeni kullanıcılar ve `Personnel` verileri ekleyebilirsiniz.
 
 ---
 
 ## API Erişimi
 
-### Swagger Dokümanı:
+### Swagger Dokümentasyonu:
 
 ```
 http://localhost:8000/docs/
 ```
 
-### Kimlik Doğrulama:
+### Kimlik Doğrulama
 
-#### 1. Giriş (JWT token al):
+#### 1. JWT Token Alma
 
 ```
 POST /api/v1/auth/
@@ -94,7 +94,7 @@ POST /api/v1/auth/
 }
 ```
 
-#### 2. Access token yenile:
+#### 2. Access Token Yenileme
 
 ```
 POST /api/v1/auth/refresh/
@@ -103,7 +103,7 @@ POST /api/v1/auth/refresh/
 }
 ```
 
-#### 3. Kullanıcı bilgisi:
+#### 3. Giriş Yapmış Kullanıcı Bilgilerini Getirme
 
 ```
 GET /api/v1/me/
@@ -111,19 +111,3 @@ Authorization: Bearer <access_token>
 ```
 
 ---
-
-## Dizin Yapısı (kısaca)
-
-```
-backend/
-├── core/
-│   ├── models/
-│   ├── views/
-│   ├── serializers/
-│   ├── urls/v1.py
-│   └── admin.py
-├── config/ (settings, urls)
-├── docker-compose.yml
-└── manage.py
-```
-

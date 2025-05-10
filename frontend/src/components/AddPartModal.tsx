@@ -58,17 +58,21 @@ export const AddPartModal = ({
         const typesResponseData = await typesRes.json();
         const modelsResponseData = await modelsRes.json();
 
-        // Handle both the new paginated response format and backward compatibility
+        // Hem yeni sayfalanmış yanıt formatını hem de geriye dönük uyumluluğu işle
         const typesData = typesResponseData.data || typesResponseData;
         const modelsData = modelsResponseData.data || modelsResponseData;
 
         setTypes(Array.isArray(typesData) ? typesData : []);
         setAircraftModels(Array.isArray(modelsData) ? modelsData : []);
 
-        // Find the part type matching the user's team responsibility
+        console.log("t", typesData);
+
+        // Kullanıcının takım sorumluluğuna uyan parça tipini bul
         const userPartType = Array.isArray(typesData)
           ? typesData.find(
-              (type: PartType) => type.name === user?.team_responsibility
+              (type: PartType) =>
+                type.name.toLowerCase() ===
+                user?.team_responsibility?.toLowerCase()
             )?.id
           : undefined;
 
@@ -130,7 +134,7 @@ export const AddPartModal = ({
       });
 
       if (response.ok) {
-        // Reset form and close modal
+        // Formu sıfırla ve modalı kapat
         setNewPart({
           serial_number: "",
           type: "",
@@ -146,13 +150,13 @@ export const AddPartModal = ({
         onHide();
       } else {
         const errorData = await response.json();
-        console.error("API Error Response:", errorData);
+        console.error("API Hata Yanıtı:", errorData);
 
-        // Handle the specific case where the error is in the "detail" field
+        // "detail" alanındaki özel hata durumunu işle
         let errorMessage = "Parça eklenirken bir hata oluştu";
 
         if (errorData && errorData.detail) {
-          // This is the primary expected error format from the backend
+          // Bu, backend'den beklenen birincil hata formatıdır
           errorMessage = errorData.detail;
         } else if (typeof errorData === "string") {
           errorMessage = errorData;
@@ -166,7 +170,7 @@ export const AddPartModal = ({
               ? errorData.error
               : JSON.stringify(errorData.error);
         } else {
-          // Check for field-specific errors
+          // Alana özel hataları kontrol et
           const fieldErrors = Object.keys(errorData)
             .filter(
               (key) =>
@@ -184,7 +188,7 @@ export const AddPartModal = ({
           if (fieldErrors.length > 0) {
             errorMessage = fieldErrors.join("\n");
           } else {
-            // If we can't extract a specific error message, show the raw error
+            // Eğer özel bir hata mesajı çıkaramazsak, ham hatayı göster
             errorMessage = `Hata: ${JSON.stringify(errorData)}`;
           }
         }

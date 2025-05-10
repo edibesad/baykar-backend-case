@@ -23,12 +23,15 @@ export const useUserStore = create<UserState>((set) => ({
       tokens,
       isAuthenticated: true,
     }),
-  logout: () =>
-    set({
+  logout: () => {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    return set({
       user: null,
       tokens: null,
       isAuthenticated: false,
-    }),
+    });
+  },
   setLoading: (isLoading: boolean) =>
     set({
       isLoading,
