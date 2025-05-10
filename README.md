@@ -17,7 +17,7 @@ Bu proje, takımlara göre parça üretimi, montaj, geri dönüşüm ve stok kon
 ### 1. Depoyu Klonlayın
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/edibesad/baykar-backend-case.git
 cd backend
 ```
 
