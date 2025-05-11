@@ -64,7 +64,7 @@ class PartViewSet(viewsets.ModelViewSet):
             # Diğer takımlar sadece kendi takımlarına izin verilen parçaları görebilir
             queryset = Part.objects.filter(type__allowed_team=personnel.team)
 
-        # Filter by aircraft_id if provided in query parameters
+        # Eğer sorgu parametrelerinde uçak ID'si varsa filtrele
         aircraft_id = self.request.query_params.get("aircraft_id", None)
         if aircraft_id:
             queryset = queryset.filter(used_in_aircraft_id=aircraft_id)
@@ -404,7 +404,7 @@ Eğer takımınız type ile eşleşmiyorsa **403 hatası** döner.
 
         bilgilerini içeren bir rapor oluşturur.
         """
-        # Execute raw SQL query
+        # Ham SQL sorgusu çalıştır
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -431,27 +431,27 @@ Eğer takımınız type ile eşleşmiyorsa **403 hatası** döner.
             columns = [col[0] for col in cursor.description]
             stock_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-        # Process data to create the hierarchical response
+        # Hiyerarşik yanıt oluşturmak için verileri işle
         result = []
         current_model_id = None
         model_parts = []
         model_name = None
 
         for item in stock_data:
-            # If we've moved to a new aircraft model
+            # Eğer yeni bir uçak modeline geçtiysek
             if current_model_id != item["aircraft_model_id"]:
-                # Add the previous model to the results (if any)
+                # Önceki modeli sonuçlara ekle (varsa)
                 if current_model_id is not None:
                     result.append(
                         {"aircraft_model_name": model_name, "parts": model_parts}
                     )
 
-                # Start a new model entry
+                # Yeni bir model girişi başlat
                 current_model_id = item["aircraft_model_id"]
                 model_name = item["aircraft_model_name"]
                 model_parts = []
 
-            # Add part data to the current model
+            # Mevcut modele parça verilerini ekle
             model_parts.append(
                 {
                     "part_type_name": item["part_type_name"],
@@ -461,11 +461,11 @@ Eğer takımınız type ile eşleşmiyorsa **403 hatası** döner.
                 }
             )
 
-        # Add the last model if we have one
+        # Son modeli ekle (varsa)
         if current_model_id is not None:
             result.append({"aircraft_model_name": model_name, "parts": model_parts})
 
-        # Apply pagination
+        # Sayfalama uygula
         page = self.paginate_queryset(result)
         if page is not None:
             return self.get_paginated_response(page)

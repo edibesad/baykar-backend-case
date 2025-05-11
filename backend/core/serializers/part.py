@@ -45,7 +45,6 @@ class PartSerializer(serializers.ModelSerializer):
     produced_by = PersonnelSerializer(read_only=True)
     used_in_aircraft = AircraftMinimalSerializer(read_only=True)
 
-    # Adding these fields for write operations since the nested serializers are read-only
     type_id = serializers.PrimaryKeyRelatedField(
         source="type", write_only=True, queryset=PartType.objects.all()
     )
